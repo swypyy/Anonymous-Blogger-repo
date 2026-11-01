@@ -11,6 +11,10 @@ This project is a lightweight blog server that allows users to:
 
 It is designed for simple local use and easy deployment on a small backend environment.
 
+## Live Demo
+Visit the working anonymous blogger here:
+https://swypyy.github.io/blog.html
+
 ## Features
 - Express.js REST API
 - CORS enabled
