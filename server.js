@@ -10,7 +10,7 @@ app.use(express.json());
 const DATA_FILE = path.join(__dirname, 'posts.json');
 const COMMENTS_FILE = path.join(__dirname, 'comments.json');
 
-// Helper to read posts
+// Helper to read posts safely
 function getPosts() {
     if (!fs.existsSync(DATA_FILE)) return [];
     try {
@@ -21,7 +21,7 @@ function getPosts() {
     }
 }
 
-// Helper to read comments
+// Helper to read comments safely
 function getComments() {
     if (!fs.existsSync(COMMENTS_FILE)) return {};
     try {
@@ -95,4 +95,3 @@ app.post('/api/comments/:postId', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Blog server running on port ${PORT}`));
-        
