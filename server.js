@@ -95,3 +95,4 @@ app.post('/api/comments/:postId', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Blog server running on port ${PORT}`));
+            
