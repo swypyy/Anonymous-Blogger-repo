@@ -1,88 +1,50 @@
-# Anonymous-Blogger-repo
+# Anonymous Blogger
 
-A private anonymous blogging backend built with Node.js and Express.
+A small anonymous blogging project with a web page and a Node.js/Express API for posts and comments.
 
-## About
-This project is a lightweight blog server that allows users to:
-- create anonymous posts
-- view all posts
-- add comments to individual posts
-- store post and comment data locally in JSON files
-
-It is designed for simple local use and easy deployment on a small backend environment.
-
-## Live Demo
-Visit the working anonymous blogger here:
-https://swypyy.github.io/blog.html
+🌐 **Web page:** [Open the blog](https://swypyy.github.io/blog.html)
 
 ## Features
-- Express.js REST API
-- CORS enabled
-- JSON-based data storage
-- Anonymous post publishing
-- Per-post comments
-- Simple server setup with Node.js
 
-## Tech Stack
+- Create and view anonymous posts
+- Add and read comments
+- Store posts and comments in local JSON files
+- Simple Express API
+
+## Built with
+
+- JavaScript
 - Node.js
 - Express
-- JavaScript
 
-## Project Structure
-- `server.js` - main backend server
-- `posts.json` - stores published posts
-- `comments.json` - stores comments by post ID
-- `package.json` - project metadata and dependencies
+## Run locally
 
-## Installation
-```bash
-npm install
-```
+1. Install [Node.js](https://nodejs.org/).
+2. Clone this repository and open its folder:
 
-## Run
-```bash
-npm start
-```
+   ```bash
+   git clone https://github.com/swypyy/Anonymous-Blogger-repo.git
+   cd Anonymous-Blogger-repo
+   ```
 
-The server runs on port `3000` by default.
+3. Install dependencies and start the server:
 
-## API Endpoints
-### Get all posts
-```http
-GET /api/posts
-```
+   ```bash
+   npm install
+   npm start
+   ```
 
-### Create a post
-```http
-POST /api/posts
-```
-Body example:
-```json
-{
-  "title": "My first post",
-  "content": "This is the post content",
-  "author": "Anonymous"
-}
-```
+The server uses port `3000` by default.
 
-### Get comments for a post
-```http
-GET /api/comments/:postId
-```
+## API
 
-### Add a comment
-```http
-POST /api/comments/:postId
-```
-Body example:
-```json
-{
-  "text": "Nice post!"
-}
-```
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/posts` | Get posts |
+| `POST` | `/api/posts` | Create a post |
+| `GET` | `/api/comments/:postId` | Get comments for a post |
+| `POST` | `/api/comments/:postId` | Add a comment |
 
 ## License
-Copyright (c) 2026 swypyy
-All rights reserved.
 
-No permission is granted to copy, modify, distribute, or use this project without written authorization from swypyy.
+See [LICENSE](LICENSE) for usage terms.
