@@ -6,7 +6,7 @@ const { Pool, types } = require('pg');
 const app = express();
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 // Keep BIGINT IDs compatible with JavaScript numbers.
 types.setTypeParser(20, value => Number(value));
@@ -22,7 +22,19 @@ const pool = new Pool({
     connectionTimeoutMillis: 10000
 });
 
-// Create database tables
+// Permanently reserved author name: Swypyy.
+// Blocks all capitalization variations and common invisible characters.
+function isReservedAuthorName(value) {
+    if (typeof value !== 'string') return false;
+
+    return value
+        .normalize('NFKC')
+        .replace(/[\u200B-\u200D\uFEFF]/g, '')
+        .trim()
+        .toLowerCase() === 'swypyy';
+}
+
+// Create database tables.
 async function initializeDatabase() {
     await pool.query(`
         CREATE TABLE IF NOT EXISTS posts (
@@ -45,19 +57,30 @@ async function initializeDatabase() {
     `);
 
     console.log('Neon database connected and ready');
+    console.log('Reserved author name protection enabled');
 }
 
-// Health check
+// Health check.
 app.get('/healthz', async (req, res) => {
     try {
         await pool.query('SELECT 1');
-        res.json({ status: 'ok', database: 'connected' });
+
+        res.json({
+            status: 'ok',
+            database: 'connected',
+            reservedNameProtection: 'enabled'
+        });
     } catch (error) {
-        res.status(500).json({ status: 'error', database: 'disconnected' });
+        console.error('Health check error:', error);
+
+        res.status(500).json({
+            status: 'error',
+            database: 'disconnected'
+        });
     }
 });
 
-// Get all posts
+// Get all posts.
 app.get('/api/posts', async (req, res) => {
     try {
         const result = await pool.query(`
@@ -69,16 +92,30 @@ app.get('/api/posts', async (req, res) => {
         res.json(result.rows);
     } catch (error) {
         console.error('Get posts error:', error);
-        res.status(500).json({ error: 'Could not load posts' });
+
+        res.status(500).json({
+            error: 'Could not load posts'
+        });
     }
 });
 
-// Create a post
+// Create a post.
 app.post('/api/posts', async (req, res) => {
     const { title, content, author } = req.body;
 
-    if (typeof title !== 'string' || !title.trim() ||
-        typeof content !== 'string' || !content.trim()) {
+    // Block Swypyy for absolutely everyone.
+    if (isReservedAuthorName(author)) {
+        return res.status(400).json({
+            error: 'The name Swypyy is reserved and cannot be used.'
+        });
+    }
+
+    if (
+        typeof title !== 'string' ||
+        !title.trim() ||
+        typeof content !== 'string' ||
+        !content.trim()
+    ) {
         return res.status(400).json({
             error: 'Title and content are required'
         });
@@ -104,11 +141,14 @@ app.post('/api/posts', async (req, res) => {
         });
     } catch (error) {
         console.error('Create post error:', error);
-        res.status(500).json({ error: 'Could not publish post' });
+
+        res.status(500).json({
+            error: 'Could not publish post'
+        });
     }
 });
 
-// Get comments for a post
+// Get comments for a post.
 app.get('/api/comments/:postId', async (req, res) => {
     try {
         const result = await pool.query(`
@@ -121,11 +161,14 @@ app.get('/api/comments/:postId', async (req, res) => {
         res.json(result.rows);
     } catch (error) {
         console.error('Get comments error:', error);
-        res.status(500).json({ error: 'Could not load comments' });
+
+        res.status(500).json({
+            error: 'Could not load comments'
+        });
     }
 });
 
-// Add a comment
+// Add a comment.
 app.post('/api/comments/:postId', async (req, res) => {
     const { text } = req.body;
 
@@ -138,11 +181,7 @@ app.post('/api/comments/:postId', async (req, res) => {
     try {
         const result = await pool.query(`
             INSERT INTO comments (post_id, text, time)
-            VALUES (
-                $1,
-                $2,
-                $3
-            )
+            VALUES ($1, $2, $3)
             RETURNING id, text, time
         `, [
             req.params.postId,
@@ -161,10 +200,14 @@ app.post('/api/comments/:postId', async (req, res) => {
         console.error('Add comment error:', error);
 
         if (error.code === '23503') {
-            return res.status(404).json({ error: 'Post not found' });
+            return res.status(404).json({
+                error: 'Post not found'
+            });
         }
 
-        res.status(500).json({ error: 'Could not add comment' });
+        res.status(500).json({
+            error: 'Could not add comment'
+        });
     }
 });
 
